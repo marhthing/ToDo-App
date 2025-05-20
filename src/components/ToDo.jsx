@@ -1,73 +1,100 @@
 import { useState } from "react";
+import { Container, Row, Col, Form, Button, ListGroup, InputGroup } from "react-bootstrap";
 
 function ToDo() {
-    const [list, setList] = useState([]);
-    const [input, setInput] =  useState('');
-    const [editIndex, setEditIndex] = useState(null)
-    const [edit, setEdit] = useState('');
+  const [list, setList] = useState([]);
+  const [input, setInput] = useState('');
+  const [editIndex, setEditIndex] = useState(null);
+  const [edit, setEdit] = useState('');
 
-    function add(){
-        if (input.trim() == '') return; //for empty value
-        setList([...list, input]); //add the new input to list
-        setInput(''); //Empthy the text back
-    }
+  function add() {
+    if (input.trim() === '') return;
+    setList([...list, input]);
+    setInput('');
+  }
 
-    function toDelete(pDelete){
-        const newList = list.filter((_, index) => index !== pDelete)
-        setList(newList); //update list
+  function toDelete(index) {
+    const newList = list.filter((_, i) => i !== index);
+    setList(newList);
+  }
 
-    }
+  function toEdit(index) {
+    setEditIndex(index);
+    setEdit(list[index]);
+  }
 
-    function toEdit(index){
-        setEditIndex(index);
-        setEdit(list[index]) ;
-    }
+  function toSave(index) {
+    const updatedList = [...list];
+    updatedList[index] = edit;
+    setList(updatedList);
+    setEditIndex(null);
+    setEdit('');
+  }
 
-    function toSave(listToSave){
-        const updatedList = [...list];
-        updatedList[listToSave] = edit;
-        setList(updatedList);
-        setEditIndex(null);
-        setEdit('');
-    }
-
-        function toCancel(index){
-            setEditIndex(null);
-        }
+  function toCancel() {
+    setEditIndex(null);
+    setEdit('');
+  }
 
   return (
-    <>
-      <h1>To do list</h1>
-      <input 
-        type="text"
-        value={input}
-        onChange={e => setInput(e.target.value)} />
-      <button onClick={add}>Add</button>
+    <Container className="mt-4">
+      <Row className="justify-content-center">
+        <Col md={6}>
+          <h3 className="text-center mb-4">📝 To-Do List</h3>
 
-      <ul>
-        {list.map((list, index) => (
-        <li key={index}>
-            {editIndex === index ? (
-            <>
-                <input 
-                type="text"
-                value={edit}
-                onChange={e => setEdit(e.target.value)} />
+          <InputGroup className="mb-3">
+            <Form.Control
+              type="text"
+              placeholder="Add new task..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <Button variant="primary" onClick={add}>
+              Add
+            </Button>
+          </InputGroup>
 
-                <button onClick={() => toSave(index)}>Save</button>
-                <button onClick={() => toCancel(index)}>Cancel</button>
-            </>
-        ) : ( 
-            <>
-            {list}{' '} 
-        <button onClick={() => toDelete(index)}> Delete</button>
-        <button onClick={() => toEdit(index)}>Edit</button>
-            </>
-        )}
-        </li>
-        ))}
-        </ul>
-    </>
+          <ListGroup>
+            {list.map((item, index) => (
+              <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
+                {editIndex === index ? (
+                  <Form.Control
+                    type="text"
+                    value={edit}
+                    onChange={(e) => setEdit(e.target.value)}
+                    className="me-2"
+                  />
+                ) : (
+                  <span>{item}</span>
+                )}
+
+                <div>
+                  {editIndex === index ? (
+                    <>
+                      <Button variant="success" size="sm" onClick={() => toSave(index)} className="me-2">
+                        Save
+                      </Button>
+                      <Button variant="secondary" size="sm" onClick={toCancel}>
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="warning" size="sm" onClick={() => toEdit(index)} className="me-2">
+                        Edit
+                      </Button>
+                      <Button variant="danger" size="sm" onClick={() => toDelete(index)}>
+                        Delete
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 

@@ -14,7 +14,7 @@ A beginner-friendly React To-Do List App that allows users to add, edit, and del
 
 - React (with Vite)
 - JavaScript (ES6+)
-- CSS (Later)
+- CSS (Bootstrap)
 
 ## 🎯 Learning Goals
 
