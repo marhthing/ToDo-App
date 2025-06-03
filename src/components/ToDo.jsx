@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Container, Row, Col, Form, Button, ListGroup, InputGroup } from "react-bootstrap";
 
 function ToDo() {
   const [list, setList] = useState([]);
@@ -9,13 +8,32 @@ function ToDo() {
 
   function add() {
     if (input.trim() === '') return;
-    setList([...list, input]);
+    setList([...list, input.trim()]);
     setInput('');
+  }
+
+  function handleKeyPress(e) {
+    if (e.key === 'Enter') {
+      add();
+    }
+  }
+
+  function handleEditKeyPress(e, index) {
+    if (e.key === 'Enter') {
+      toSave(index);
+    } else if (e.key === 'Escape') {
+      toCancel();
+    }
   }
 
   function toDelete(index) {
     const newList = list.filter((_, i) => i !== index);
     setList(newList);
+    // Reset edit state if we're deleting the item being edited
+    if (editIndex === index) {
+      setEditIndex(null);
+      setEdit('');
+    }
   }
 
   function toEdit(index) {
@@ -24,8 +42,9 @@ function ToDo() {
   }
 
   function toSave(index) {
+    if (edit.trim() === '') return;
     const updatedList = [...list];
-    updatedList[index] = edit;
+    updatedList[index] = edit.trim();
     setList(updatedList);
     setEditIndex(null);
     setEdit('');
@@ -37,64 +56,98 @@ function ToDo() {
   }
 
   return (
-    <Container className="mt-4">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <h3 className="text-center mb-4">📝 To-Do List</h3>
-
-          <InputGroup className="mb-3">
-            <Form.Control
+    <div className="todo-container">
+      <div className="todo-wrapper">
+        <h1 className="todo-title">📝 My To-Do List</h1>
+        
+        <div className="input-section">
+          <div className="input-group">
+            <input
               type="text"
-              placeholder="Add new task..."
+              className="todo-input"
+              placeholder="Add a new task..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              autoFocus
             />
-            <Button variant="primary" onClick={add}>
-              Add
-            </Button>
-          </InputGroup>
+            <button 
+              className="add-btn"
+              onClick={add}
+              disabled={!input.trim()}
+            >
+              Add Task
+            </button>
+          </div>
+        </div>
 
-          <ListGroup>
-            {list.map((item, index) => (
-              <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
+        <div className="todo-list">
+          {list.length === 0 ? (
+            <div className="empty-state">
+              <p>No tasks yet. Add one above! ✨</p>
+            </div>
+          ) : (
+            list.map((item, index) => (
+              <div key={index} className="todo-item">
                 {editIndex === index ? (
-                  <Form.Control
-                    type="text"
-                    value={edit}
-                    onChange={(e) => setEdit(e.target.value)}
-                    className="me-2"
-                  />
+                  <div className="edit-mode">
+                    <input
+                      type="text"
+                      className="edit-input"
+                      value={edit}
+                      onChange={(e) => setEdit(e.target.value)}
+                      onKeyPress={(e) => handleEditKeyPress(e, index)}
+                      autoFocus
+                    />
+                    <div className="edit-buttons">
+                      <button 
+                        className="save-btn"
+                        onClick={() => toSave(index)}
+                        disabled={!edit.trim()}
+                      >
+                        ✓
+                      </button>
+                      <button 
+                        className="cancel-btn"
+                        onClick={toCancel}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
                 ) : (
-                  <span>{item}</span>
+                  <div className="view-mode">
+                    <span className="task-text">{item}</span>
+                    <div className="action-buttons">
+                      <button 
+                        className="edit-btn"
+                        onClick={() => toEdit(index)}
+                        title="Edit task"
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        className="delete-btn"
+                        onClick={() => toDelete(index)}
+                        title="Delete task"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
                 )}
-
-                <div>
-                  {editIndex === index ? (
-                    <>
-                      <Button variant="success" size="sm" onClick={() => toSave(index)} className="me-2">
-                        Save
-                      </Button>
-                      <Button variant="secondary" size="sm" onClick={toCancel}>
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="warning" size="sm" onClick={() => toEdit(index)} className="me-2">
-                        Edit
-                      </Button>
-                      <Button variant="danger" size="sm" onClick={() => toDelete(index)}>
-                        Delete
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Col>
-      </Row>
-    </Container>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {list.length > 0 && (
+          <div className="todo-stats">
+            <p>{list.length} task{list.length !== 1 ? 's' : ''} total</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
